@@ -2,49 +2,55 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(MyApp());
 }
-
+// ignore: use_key_in_widget_constructors
 class MyApp extends StatelessWidget {
 
-  List<Task> tasks = [
-    Task(title: "Sprawdzian", deadline: "jutro"),
-    Task(title: "Silownia", deadline: "dzisiaj"),
-    Task(title: "Impreza", deadline: "w tym tygodniu"),
-    Task(title: "Wakacje", deadline: "w wakacje"),
+  List <Task> tasks = [
+    Task(title: "Siłownia",deadline: "Dzisiaj"),
+    Task(title: "Nauka" ,deadline: "Jutro"),
+    Task(title: "Wakacje" ,deadline: "Za pół roku"),
+    Task(title: "Swięta" ,deadline: "Za miesiąc"),
   ];
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Center(
-
-
-        child: Column(
-          children: [
-            Text("Dzisiejsze zadania",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("KrakFlow"),
+        ),
+        body: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          child: Column(
+            children: [
+              Text(
+                "Dzisiejsze zadania",
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold
                 ),
               ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  final task = tasks[index];
-                  return TaskCard(
-                    title: task.title,
-                    subtitle: "termin: ${task.deadline}",
-                    icon: Icons.radio_button_unchecked,
-                  );
-                },
+              SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                    itemCount: tasks.length,
+                    itemBuilder: (context,index) {
+                      return Column(
+                        children: [
+                          TaskCard(
+                            title: tasks[index].title,
+                            subtitle: tasks[index].deadline,
+                            icon: Icons.assignment,
+                          ),
+                          SizedBox(height: 10),
+                        ],
+                      );
+                    }
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-
-
-
-
       ),
     );
   }
@@ -77,5 +83,8 @@ class TaskCard extends StatelessWidget {
     );
   }
 }
+
+
+
 
 

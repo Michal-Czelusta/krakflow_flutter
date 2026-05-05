@@ -24,8 +24,9 @@ class TaskRepository {
 class Task {
   final String title;
   final String deadline;
-  final bool done;
+  bool done;
   final String priority;
+
   Task({
     required this.title,
     required this.deadline,

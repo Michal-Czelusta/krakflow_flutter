@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'task_repository.dart';
+import 'task_api_service.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -23,6 +25,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String selectedFilter = "wszystkie";
+
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    try {
+      final tasks = await TaskApiService.fetchTasks();
+      setState(() {
+        TaskRepository.tasks = tasks;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   List<Task> get filteredTasks {
     if (selectedFilter == "wykonane") {
@@ -85,8 +111,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : _error != null
+            ? Center(child: Text("Błąd: $_error"))
+            : Padding(
+              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

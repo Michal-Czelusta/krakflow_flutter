@@ -6,12 +6,15 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'task_repository.dart';
 import 'task_local_database.dart';
 import 'task_sync_service.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
   await Hive.openBox("tasks");
+
+  await NotificationService.init();
 
   runApp(const MyApp());
 }
@@ -146,8 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Text("Błąd: $_error"),
       )
           : Padding(
-        padding:
-        EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -184,8 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Dismissible(
                         key: ValueKey(task.id),
-                        direction:
-                        DismissDirection.endToStart,
+                        direction: DismissDirection.endToStart,
                         onDismissed: (direction) async {
                           await TaskLocalDatabase.deleteTask(
                             task.id,
@@ -206,8 +207,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         background: Container(
                           alignment: Alignment.centerRight,
-                          padding:
-                          EdgeInsets.symmetric(horizontal: 20),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20),
                           color: Colors.red,
                           child: Icon(
                             Icons.delete,
@@ -220,20 +221,29 @@ class _HomeScreenState extends State<HomeScreen> {
                           "Termin: ${task.deadline} | Priorytet: ${task.priority}",
                           done: task.done,
                           onChanged: (value) async {
+                            final isDone = value ?? false;
+                            final wasDone = task.done;
+
                             final updatedTask = Task(
                               id: task.id,
                               title: task.title,
                               deadline: task.deadline,
                               priority: task.priority,
-                              done: value ?? false,
+                              done: isDone,
                             );
 
                             await TaskLocalDatabase.updateTask(
                               updatedTask,
                             );
 
+                            if (!wasDone && isDone) {
+                              await NotificationService
+                                  .showTaskDoneNotification(
+                                  task.title);
+                            }
+
                             setState(() {
-                              task.done = value ?? false;
+                              task.done = isDone;
                             });
                           },
                           onTap: () async {
@@ -379,8 +389,7 @@ class FilterBar extends StatelessWidget {
                 vertical: 4,
               ),
               minimumSize: Size(0, 0),
-              tapTargetSize:
-              MaterialTapTargetSize.shrinkWrap,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
               filter[0].toUpperCase() + filter.substring(1),
@@ -396,14 +405,9 @@ class FilterBar extends StatelessWidget {
 class AddTaskScreen extends StatelessWidget {
   AddTaskScreen({super.key});
 
-  final TextEditingController titleController =
-  TextEditingController();
-
-  final TextEditingController deadlineController =
-  TextEditingController();
-
-  final TextEditingController priorityController =
-  TextEditingController();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController deadlineController = TextEditingController();
+  final TextEditingController priorityController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -414,8 +418,7 @@ class AddTaskScreen extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: titleController,
@@ -488,8 +491,7 @@ class EditTaskScreen extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: titleController,
